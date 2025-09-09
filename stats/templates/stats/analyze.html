@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Normality Checker</title>
+  <style>
+    body{font-family: sans-serif; max-width:880px; margin:20px auto;}
+    .results{margin-top:20px;}
+    table{border-collapse:collapse;}
+    td, th{padding:6px 10px; border:1px solid #ddd;}
+    img{max-width:100%; height:auto; margin-top:10px; border:1px solid #ccc;}
+  </style>
+</head>
+<body>
+  <h1>Normality Checker (10–15 numbers)</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Analyze</button>
+  </form>
+
+  {% if results %}
+    <div class="results">
+      <h2>Summary statistics</h2>
+      <table>
+        <tr><th>n</th><td>{{ results.n }}</td></tr>
+        <tr><th>Mean</th><td>{{ results.mean }}</td></tr>
+        <tr><th>Median</th><td>{{ results.median }}</td></tr>
+        <tr><th>Sample SD</th><td>{{ results.std_sample }}</td></tr>
+        <tr><th>Skewness</th><td>{{ results.skewness }}</td></tr>
+        <tr><th>Excess Kurtosis</th><td>{{ results.kurtosis_excess }}</td></tr>
+      </table>
+
+      <h3>Normality tests (α = 0.05)</h3>
+      <p><strong>Shapiro–Wilk:</strong> statistic = {{ results.shapiro_stat }}, p = {{ results.shapiro_p }} — <em>{{ results.interpretation_shapiro }}</em></p>
+      <p><strong>D'Agostino (K²):</strong> statistic = {{ results.dagostino_stat }}, p = {{ results.dagostino_p }} — <em>{{ results.interpretation_dagostino }}</em></p>
+
+      <h3>Plots</h3>
+      {% if hist_img %}
+        <h4>Histogram</h4>
+        <img src="data:image/png;base64,{{ hist_img }}" alt="histogram">
+      {% endif %}
+      {% if qq_img %}
+        <h4>Q–Q plot</h4>
+        <img src="data:image/png;base64,{{ qq_img }}" alt="qqplot">
+      {% endif %}
+    </div>
+  {% endif %}
+
+</body>
+</html>

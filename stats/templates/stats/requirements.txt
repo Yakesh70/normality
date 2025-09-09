@@ -1,0 +1,7 @@
+Django>=4.2
+numpy
+scipy
+matplotlib
+gunicorn
+whitenoise
+python-dotenv
