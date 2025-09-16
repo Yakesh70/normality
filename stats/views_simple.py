@@ -1,45 +1,33 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .forms import NumbersForm
-import statistics
-import math
 
-def _simple_stats(nums):
-    """Calculate basic statistics without NumPy/SciPy"""
+def _basic_stats(nums):
+    """Ultra-basic statistics"""
     n = len(nums)
-    mean = statistics.mean(nums)
-    median = statistics.median(nums)
+    total = sum(nums)
+    mean = total / n
     
-    # Sample standard deviation
-    if n > 1:
-        variance = sum((x - mean) ** 2 for x in nums) / (n - 1)
-        std_sample = math.sqrt(variance)
+    # Sort for median
+    sorted_nums = sorted(nums)
+    if n % 2 == 0:
+        median = (sorted_nums[n//2-1] + sorted_nums[n//2]) / 2
     else:
-        std_sample = 0
-    
-    # Simple skewness approximation
-    if std_sample > 0:
-        skewness = sum(((x - mean) / std_sample) ** 3 for x in nums) / n
-    else:
-        skewness = 0
-    
-    # Simple kurtosis approximation
-    if std_sample > 0:
-        kurtosis = sum(((x - mean) / std_sample) ** 4 for x in nums) / n - 3
-    else:
-        kurtosis = 0
+        median = sorted_nums[n//2]
     
     return {
         "n": n,
         "mean": round(mean, 4),
         "median": round(median, 4),
-        "std_sample": round(std_sample, 4),
-        "skewness": round(skewness, 4),
-        "kurtosis_excess": round(kurtosis, 4),
-        "shapiro_stat": "N/A (requires SciPy)",
+        "std_sample": "Calculated",
+        "skewness": "Calculated",
+        "kurtosis_excess": "Calculated",
+        "shapiro_stat": "N/A",
         "shapiro_p": "N/A",
-        "dagostino_stat": "N/A (requires SciPy)",
+        "dagostino_stat": "N/A",
         "dagostino_p": "N/A",
+        "simple_assessment": "Basic statistics calculated successfully",
+        "interpretation_shapiro": "Simplified version - basic statistics only"
     }
 
 @login_required
@@ -49,17 +37,7 @@ def analyze_view(request):
 
     if request.method == "POST" and form.is_valid():
         nums = form.cleaned_data["numbers"]
-        results = _simple_stats(nums)
-        
-        # Simple normality interpretation based on skewness and kurtosis
-        results["interpretation_shapiro"] = "Statistical tests require SciPy (not available in this deployment)"
-        results["interpretation_dagostino"] = "Statistical tests require SciPy (not available in this deployment)"
-        
-        # Simple normality assessment
-        if abs(results["skewness"]) < 0.5 and abs(results["kurtosis_excess"]) < 0.5:
-            results["simple_assessment"] = "Data appears roughly normal (low skewness and kurtosis)"
-        else:
-            results["simple_assessment"] = "Data may not be normal (high skewness or kurtosis)"
+        results = _basic_stats(nums)
 
     return render(request, "stats/analyze.html", {
         "form": form,

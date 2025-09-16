@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views_simple
+from . import views_minimal
 
 urlpatterns = [
-    path("", views_simple.analyze_view, name="analyze"),
+    path("", views_minimal.analyze_view, name="analyze"),
 ]
