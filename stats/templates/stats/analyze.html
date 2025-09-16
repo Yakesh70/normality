@@ -106,34 +106,54 @@
         <tr><th>Excess Kurtosis</th><td>{{ results.kurtosis_excess|floatformat:4 }}</td></tr>
       </table>
 
-      <h2>🧪 Normality Tests (α = 0.05)</h2>
-      <div class="test-results">
-        <p><strong>Shapiro–Wilk Test:</strong><br>
-        Statistic = {{ results.shapiro_stat|floatformat:4 }}, p-value = {{ results.shapiro_p|floatformat:4 }}<br>
-        <em>{{ results.interpretation_shapiro }}</em></p>
-      </div>
-      
-      <div class="test-results">
-        <p><strong>D'Agostino K² Test:</strong><br>
-        Statistic = {{ results.dagostino_stat|floatformat:4 }}, p-value = {{ results.dagostino_p|floatformat:4 }}<br>
-        <em>{{ results.interpretation_dagostino }}</em></p>
-      </div>
-
-      <h2>📊 Visual Analysis</h2>
-      {% if hist_img %}
-        <div class="plot-section">
-          <h3>Histogram</h3>
-          <img src="data:image/png;base64,{{ hist_img }}" alt="Data histogram">
+      <h2>🧪 Normality Assessment</h2>
+      {% if results.simple_assessment %}
+        <div class="test-results" style="background: #fff3cd; border: 1px solid #ffeaa7;">
+          <p><strong>⚠️ Simplified Version:</strong> This deployment uses basic statistical calculations.</p>
+        </div>
+        <div class="test-results">
+          <p><strong>Simple Assessment:</strong><br>
+          <em>{{ results.simple_assessment }}</em></p>
+        </div>
+        <div class="test-results">
+          <p><strong>Statistical Tests:</strong><br>
+          {{ results.interpretation_shapiro }}</p>
+        </div>
+      {% else %}
+        <div class="test-results">
+          <p><strong>Shapiro–Wilk Test:</strong><br>
+          Statistic = {{ results.shapiro_stat|floatformat:4 }}, p-value = {{ results.shapiro_p|floatformat:4 }}<br>
+          <em>{{ results.interpretation_shapiro }}</em></p>
+        </div>
+        
+        <div class="test-results">
+          <p><strong>D'Agostino K² Test:</strong><br>
+          Statistic = {{ results.dagostino_stat|floatformat:4 }}, p-value = {{ results.dagostino_p|floatformat:4 }}<br>
+          <em>{{ results.interpretation_dagostino }}</em></p>
         </div>
       {% endif %}
-      {% if qq_img %}
-        <div class="plot-section">
-          <h3>Q-Q Plot</h3>
-          <img src="data:image/png;base64,{{ qq_img }}" alt="Q-Q plot against normal distribution">
-          <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-            <em>Points close to the diagonal line suggest normal distribution</em>
-          </p>
-        </div>
+
+      {% if hist_img or qq_img %}
+        <h2>📊 Visual Analysis</h2>
+        {% if hist_img %}
+          <div class="plot-section">
+            <h3>Histogram</h3>
+            <img src="data:image/png;base64,{{ hist_img }}" alt="Data histogram">
+          </div>
+        {% endif %}
+        {% if qq_img %}
+          <div class="plot-section">
+            <h3>Q-Q Plot</h3>
+            <img src="data:image/png;base64,{{ qq_img }}" alt="Q-Q plot against normal distribution">
+            <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+              <em>Points close to the diagonal line suggest normal distribution</em>
+            </p>
+          </div>
+        {% endif %}
+      {% else %}
+        <p style="font-size: 0.9em; color: #666; margin-top: 20px;">
+          <em>Note: Visual plots not available in this simplified version.</em>
+        </p>
       {% endif %}
     </div>
   {% endif %}

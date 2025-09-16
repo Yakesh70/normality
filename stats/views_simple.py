@@ -61,7 +61,7 @@ def analyze_view(request):
         else:
             results["simple_assessment"] = "Data may not be normal (high skewness or kurtosis)"
 
-    return render(request, "stats/analyze_simple.html", {
+    return render(request, "stats/analyze.html", {
         "form": form,
         "results": results,
     })
