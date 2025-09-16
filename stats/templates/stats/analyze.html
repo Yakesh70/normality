@@ -4,46 +4,136 @@
   <meta charset="utf-8">
   <title>Normality Checker</title>
   <style>
-    body{font-family: sans-serif; max-width:880px; margin:20px auto;}
-    .results{margin-top:20px;}
-    table{border-collapse:collapse;}
-    td, th{padding:6px 10px; border:1px solid #ddd;}
-    img{max-width:100%; height:auto; margin-top:10px; border:1px solid #ccc;}
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-container {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    .results {
+      margin-top: 30px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20px 0;
+    }
+    td, th {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #f1f1f1;
+      font-weight: bold;
+    }
+    .test-results {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .plot-section {
+      margin: 30px 0;
+    }
   </style>
 </head>
 <body>
-  <h1>Normality Checker (10–15 numbers)</h1>
+  <div style="text-align: right; margin-bottom: 20px;">
+    <span>Welcome, {{ user.username }}!</span>
+    <a href="{% url 'logout' %}" style="margin-left: 15px; color: #e74c3c; text-decoration: none;">🚪 Logout</a>
+  </div>
+  <h1>📊 Normality Testing Tool</h1>
+  <p style="text-align: center; color: #666; margin-bottom: 30px;">Test if your data follows a normal distribution</p>
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Analyze</button>
-  </form>
+  <div class="form-container">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">🔍 Analyze Data</button>
+    </form>
+  </div>
 
   {% if results %}
     <div class="results">
-      <h2>Summary statistics</h2>
+      <h2>📈 Summary Statistics</h2>
       <table>
-        <tr><th>n</th><td>{{ results.n }}</td></tr>
-        <tr><th>Mean</th><td>{{ results.mean }}</td></tr>
-        <tr><th>Median</th><td>{{ results.median }}</td></tr>
-        <tr><th>Sample SD</th><td>{{ results.std_sample }}</td></tr>
-        <tr><th>Skewness</th><td>{{ results.skewness }}</td></tr>
-        <tr><th>Excess Kurtosis</th><td>{{ results.kurtosis_excess }}</td></tr>
+        <tr><th>Sample Size (n)</th><td>{{ results.n }}</td></tr>
+        <tr><th>Mean</th><td>{{ results.mean|floatformat:4 }}</td></tr>
+        <tr><th>Median</th><td>{{ results.median|floatformat:4 }}</td></tr>
+        <tr><th>Sample Standard Deviation</th><td>{{ results.std_sample|floatformat:4 }}</td></tr>
+        <tr><th>Skewness</th><td>{{ results.skewness|floatformat:4 }}</td></tr>
+        <tr><th>Excess Kurtosis</th><td>{{ results.kurtosis_excess|floatformat:4 }}</td></tr>
       </table>
 
-      <h3>Normality tests (α = 0.05)</h3>
-      <p><strong>Shapiro–Wilk:</strong> statistic = {{ results.shapiro_stat }}, p = {{ results.shapiro_p }} — <em>{{ results.interpretation_shapiro }}</em></p>
-      <p><strong>D'Agostino (K²):</strong> statistic = {{ results.dagostino_stat }}, p = {{ results.dagostino_p }} — <em>{{ results.interpretation_dagostino }}</em></p>
+      <h2>🧪 Normality Tests (α = 0.05)</h2>
+      <div class="test-results">
+        <p><strong>Shapiro–Wilk Test:</strong><br>
+        Statistic = {{ results.shapiro_stat|floatformat:4 }}, p-value = {{ results.shapiro_p|floatformat:4 }}<br>
+        <em>{{ results.interpretation_shapiro }}</em></p>
+      </div>
+      
+      <div class="test-results">
+        <p><strong>D'Agostino K² Test:</strong><br>
+        Statistic = {{ results.dagostino_stat|floatformat:4 }}, p-value = {{ results.dagostino_p|floatformat:4 }}<br>
+        <em>{{ results.interpretation_dagostino }}</em></p>
+      </div>
 
-      <h3>Plots</h3>
+      <h2>📊 Visual Analysis</h2>
       {% if hist_img %}
-        <h4>Histogram</h4>
-        <img src="data:image/png;base64,{{ hist_img }}" alt="histogram">
+        <div class="plot-section">
+          <h3>Histogram</h3>
+          <img src="data:image/png;base64,{{ hist_img }}" alt="Data histogram">
+        </div>
       {% endif %}
       {% if qq_img %}
-        <h4>Q–Q plot</h4>
-        <img src="data:image/png;base64,{{ qq_img }}" alt="qqplot">
+        <div class="plot-section">
+          <h3>Q-Q Plot</h3>
+          <img src="data:image/png;base64,{{ qq_img }}" alt="Q-Q plot against normal distribution">
+          <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+            <em>Points close to the diagonal line suggest normal distribution</em>
+          </p>
+        </div>
       {% endif %}
     </div>
   {% endif %}

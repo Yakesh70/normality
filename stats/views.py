@@ -1,5 +1,6 @@
 
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from .forms import NumbersForm
 import numpy as np
 from scipy import stats
@@ -38,14 +39,17 @@ def _arr_stats(arr):
 
 def _fig_to_base64(fig):
     buf = io.BytesIO()
-    fig.tight_layout()
-    fig.savefig(buf, format='png', dpi=150)
-    plt.close(fig)
-    buf.seek(0)
-    img_bytes = buf.getvalue()
-    buf.close()
-    return base64.b64encode(img_bytes).decode('ascii')
+    try:
+        fig.tight_layout()
+        fig.savefig(buf, format='png', dpi=150, bbox_inches='tight')
+        buf.seek(0)
+        img_bytes = buf.getvalue()
+        return base64.b64encode(img_bytes).decode('ascii')
+    finally:
+        plt.close(fig)
+        buf.close()
 
+@login_required
 def analyze_view(request):
     form = NumbersForm(request.POST or None)
     results = None
@@ -71,17 +75,19 @@ def analyze_view(request):
         )
 
         # Histogram
-        fig1 = plt.figure()
-        plt.hist(arr, bins='auto', edgecolor='black')
-        plt.title("Histogram")
-        plt.xlabel("Value")
-        plt.ylabel("Frequency")
+        fig1, ax1 = plt.subplots(figsize=(8, 6))
+        ax1.hist(arr, bins='auto', edgecolor='black', alpha=0.7, color='skyblue')
+        ax1.set_title("Histogram", fontsize=14, fontweight='bold')
+        ax1.set_xlabel("Value", fontsize=12)
+        ax1.set_ylabel("Frequency", fontsize=12)
+        ax1.grid(True, alpha=0.3)
         hist_img = _fig_to_base64(fig1)
 
         # Q-Q plot using scipy.stats.probplot
-        fig2 = plt.figure()
-        stats.probplot(arr, dist="norm", plot=plt)
-        plt.title("Q-Q Plot")
+        fig2, ax2 = plt.subplots(figsize=(8, 6))
+        stats.probplot(arr, dist="norm", plot=ax2)
+        ax2.set_title("Q-Q Plot (Normal Distribution)", fontsize=14, fontweight='bold')
+        ax2.grid(True, alpha=0.3)
         qq_img = _fig_to_base64(fig2)
 
     return render(request, "stats/analyze.html", {

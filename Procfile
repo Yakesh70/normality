@@ -1,0 +1,1 @@
+web: gunicorn normality_project.wsgi:application
