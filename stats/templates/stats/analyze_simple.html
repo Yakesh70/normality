@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Normality Testing Tool</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-container {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    .results {
+      margin-top: 30px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20px 0;
+    }
+    td, th {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #f1f1f1;
+      font-weight: bold;
+    }
+    .test-results {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    .warning {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align: right; margin-bottom: 20px;">
+    <span>Welcome, {{ user.username }}!</span>
+    <a href="{% url 'logout' %}" style="margin-left: 15px; color: #e74c3c; text-decoration: none;">🚪 Logout</a>
+  </div>
+  <h1>📊 Normality Testing Tool</h1>
+  <p style="text-align: center; color: #666; margin-bottom: 30px;">Test if your data follows a normal distribution</p>
+
+  <div class="form-container">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">🔍 Analyze Data</button>
+    </form>
+  </div>
+
+  {% if results %}
+    <div class="results">
+      <div class="warning">
+        <strong>⚠️ Simplified Version:</strong> This deployment uses basic statistical calculations. 
+        For full normality tests (Shapiro-Wilk, D'Agostino), use the Railway deployment.
+      </div>
+
+      <h2>📈 Summary Statistics</h2>
+      <table>
+        <tr><th>Sample Size (n)</th><td>{{ results.n }}</td></tr>
+        <tr><th>Mean</th><td>{{ results.mean }}</td></tr>
+        <tr><th>Median</th><td>{{ results.median }}</td></tr>
+        <tr><th>Sample Standard Deviation</th><td>{{ results.std_sample }}</td></tr>
+        <tr><th>Skewness</th><td>{{ results.skewness }}</td></tr>
+        <tr><th>Excess Kurtosis</th><td>{{ results.kurtosis_excess }}</td></tr>
+      </table>
+
+      <h2>🧪 Normality Assessment</h2>
+      <div class="test-results">
+        <p><strong>Simple Assessment:</strong><br>
+        <em>{{ results.simple_assessment }}</em></p>
+      </div>
+      
+      <div class="test-results">
+        <p><strong>Statistical Tests:</strong><br>
+        {{ results.interpretation_shapiro }}</p>
+      </div>
+
+      <p style="font-size: 0.9em; color: #666; margin-top: 20px;">
+        <em>Note: For complete statistical analysis with plots, use the full version deployed on Railway.</em>
+      </p>
+    </div>
+  {% endif %}
+
+</body>
+</html>
